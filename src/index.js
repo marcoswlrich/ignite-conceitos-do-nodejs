@@ -16,7 +16,7 @@ function checksExistsUserAccount(request, response, next) {
 
   if (!user) {
     return response
-      .status(400)
+      .status(404)
       .json({ error: "This user account does not exist" });
   }
 
@@ -28,7 +28,9 @@ function checksExistsUserAccount(request, response, next) {
 app.post("/users", (request, response) => {
   const { name, username } = request.body;
 
-  const userNameAlreadyExists = users.some((user) => user.name === username);
+  const userNameAlreadyExists = users.some(
+    (user) => user.username === username
+  );
 
   if (userNameAlreadyExists) {
     return response.status(400).json({ error: "The username already exists!" });
@@ -113,7 +115,7 @@ app.delete("/todos/:id", checksExistsUserAccount, (request, response) => {
 
   user.todos.splice(todo, 1);
 
-  return response.status(204).json({ msg: "Todo deleted!" });
+  return response.status(204).send();
 });
 
 module.exports = app;
