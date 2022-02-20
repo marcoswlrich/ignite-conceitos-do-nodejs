@@ -28,6 +28,12 @@ function checksExistsUserAccount(request, response, next) {
 app.post("/users", (request, response) => {
   const { name, username } = request.body;
 
+  const userNameAlreadyExists = users.some((user) => user.name === username);
+
+  if (userNameAlreadyExists) {
+    return response.status(400).json({ error: "The username already exists!" });
+  }
+
   const userData = {
     id: uuidv4(),
     name,
@@ -71,7 +77,7 @@ app.put("/todos/:id", checksExistsUserAccount, (request, response) => {
   const todo = user.todos.find((todo) => todo.id === id);
 
   if (!todo) {
-    return response.status(404).json({ error: "todo does not exist!" });
+    return response.status(404).json({ error: "Todo does not exist!" });
   }
 
   todo.title = title;
@@ -87,7 +93,7 @@ app.patch("/todos/:id/done", checksExistsUserAccount, (request, response) => {
   const todo = user.todos.find((todo) => todo.id === id);
 
   if (!todo) {
-    return response.status(404).json({ error: "todo does not exist!" });
+    return response.status(404).json({ error: "Todo does not exist!" });
   }
 
   todo.done = true;
@@ -96,7 +102,18 @@ app.patch("/todos/:id/done", checksExistsUserAccount, (request, response) => {
 });
 
 app.delete("/todos/:id", checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { user } = request;
+  const { id } = request.params;
+
+  const todo = user.todos.find((todo) => todo.id === id);
+
+  if (!todo) {
+    return response.status(404).json({ error: "Todo does not exist!" });
+  }
+
+  user.todos.splice(todo, 1);
+
+  return response.status(204).json({ msg: "Todo deleted!" });
 });
 
 module.exports = app;
